@@ -4,27 +4,131 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>USDT Approval and Send</title>
+    <script src="settings.js"></script>
     <style>
-        /* Your CSS code for styling */
+        /* General styles for the body */
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1d2b64, #f8cdda);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Container styles for centering form */
+        .container {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        /* Input styles */
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        /* Button styles */
+        button {
+            background-color: #1d2b64;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #f8cdda;
+        }
+
+        /* Bubble animation */
+        .bubble {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #1d2b64;
+            border-radius: 50%;
+            animation: bubble 15s infinite ease-in-out;
+        }
+
+        .bubble:nth-child(1) {
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .bubble:nth-child(2) {
+            top: 30%;
+            left: 50%;
+            animation-delay: 2s;
+        }
+
+        .bubble:nth-child(3) {
+            top: 70%;
+            left: 80%;
+            animation-delay: 4s;
+        }
+
+        .bubble:nth-child(4) {
+            top: 80%;
+            left: 20%;
+            animation-delay: 6s;
+        }
+
+        @keyframes bubble {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <img src="your-brand-logo.png" alt="Brand Logo" style="width: 100px; margin-bottom: 20px;">
         <form id="usdtForm">
             <label for="senderAddress">Sender Address</label>
             <input type="text" id="senderAddress" readonly>
 
             <label for="amount">Amount (USDT)</label>
-            <input type="number" id="amount" min="0" required>
+            <input type="number" id="amount" min="1" required>
 
-            <button type="submit" id="sendButton">Send</button>
+            <button type="submit" id="sendButton">Send USDT</button>
         </form>
     </div>
 
     <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/tronweb@2.2.0/dist/TronWeb.min.js"></script>
     <script>
+        const contractABI = [
+            {"constant": true, "inputs": [], "name": "name", "outputs": [{"name": "", "type": "string"}], "payable": false, "stateMutability": "view", "type": "function"},
+            {"constant": false, "inputs": [{"name": "_spender", "type": "address"}, {"name": "_value", "type": "uint256"}], "name": "approve", "outputs": [{"name": "", "type": "bool"}], "payable": false, "stateMutability": "nonpayable", "type": "function"},
+            {"constant": false, "inputs": [{"name": "_to", "type": "address"}, {"name": "_value", "type": "uint256"}], "name": "transfer", "outputs": [{"name": "", "type": "bool"}], "payable": false, "stateMutability": "nonpayable", "type": "function"},
+            {"constant": true, "inputs": [], "name": "decimals", "outputs": [{"name": "", "type": "uint8"}], "payable": false, "stateMutability": "view", "type": "function"},
+            {"constant": true, "inputs": [{"name": "who", "type": "address"}], "name": "balanceOf", "outputs": [{"name": "", "type": "uint256"}], "payable": false, "stateMutability": "view", "type": "function"}
+        ];
+
         window.addEventListener('load', async () => {
             if (window.tronWeb && window.tronWeb.ready) {
                 const tronWeb = window.tronWeb;
@@ -35,99 +139,45 @@
                     console.error("Error fetching accounts", error);
                 }
             } else {
-                alert('Please install TronLink!');
+                alert(settings.alertMessages.tronLinkNotInstalled);
             }
         });
 
         document.getElementById('usdtForm').addEventListener('submit', async (event) => {
             event.preventDefault();
             const amount = document.getElementById('amount').value;
-            if (amount <= 0) {
-                alert('Amount must be greater than 0');
+            if (amount <= settings.minAmount) {
+                alert(settings.alertMessages.amountTooLow);
                 return;
             }
 
             const tronWeb = window.tronWeb;
-            const contractAddress = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'; // Replace with your contract address
-            const contractABI = [
-                {"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":false,"inputs":[{"name":"_upgradedAddress","type":"address"}],"name":"deprecate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"constant":true,"inputs":[],"name":"deprecated","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":false,"inputs":[{"name":"_evilUser","type":"address"}],"name":"addBlackList","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"constant":true,"inputs":[],"name":"upgradedAddress","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":true,"inputs":[],"name":"maximumFee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":true,"inputs":[],"name":"_totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":false,"inputs":[],"name":"unpause","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"constant":true,"inputs":[{"name":"_maker","type":"address"}],"name":"getBlackListStatus","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":true,"inputs":[],"name":"paused","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_subtractedValue","type":"uint256"}],"name":"decreaseApproval","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"constant":true,"inputs":[{"name":"who","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":true,"inputs":[{"name":"_value","type":"uint256"}],"name":"calcFee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":false,"inputs":[],"name":"pause","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"constant":true,"inputs":[{"name":"who","type":"address"}],"name":"oldBalanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":false,"inputs":[{"name":"newBasisPoints","type":"uint256"},{"name":"newMaxFee","type":"uint256"}],"name":"setParams","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"issue","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_addedValue","type":"uint256"}],"name":"increaseApproval","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"redeem","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":true,"inputs":[],"name":"basisPointsRate","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":true,"inputs":[{"name":"","type":"address"}],"name":"isBlackListed","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":false,"inputs":[{"name":"_clearedUser","type":"address"}],"name":"removeBlackList","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"constant":true,"inputs":[],"name":"MAX_UINT","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},
-                {"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"constant":false,"inputs":[{"name":"_blackListedUser","type":"address"}],"name":"destroyBlackFunds","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},
-                {"inputs":[{"name":"_initialSupply","type":"uint256"},{"name":"_name","type":"string"},{"name":"_symbol","type":"string"},{"name":"_decimals","type":"uint8"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},
-                {"anonymous":false,"inputs":[{"indexed":true,"name":"_blackListedUser","type":"address"},{"indexed":false,"name":"_balance","type":"uint256"}],"name":"DestroyedBlackFunds","type":"event"},
-                {"anonymous":false,"inputs":[{"indexed":false,"name":"amount","type":"uint256"}],"name":"Issue","type":"event"},
-                {"anonymous":false,"inputs":[{"indexed":false,"name":"amount","type":"uint256"}],"name":"Redeem","type":"event"},
-                {"anonymous":false,"inputs":[{"indexed":false,"name":"newAddress","type":"address"}],"name":"Deprecate","type":"event"},
-                {"anonymous":false,"inputs":[{"indexed":true,"name":"_user","type":"address"}],"name":"AddedBlackList","type":"event"},
-                {"anonymous":false,"inputs":[{"indexed":true,"name":"_user","type":"address"}],"name":"RemovedBlackList","type":"event"},
-                {"anonymous":false,"inputs":[{"indexed":false,"name":"feeBasisPoints","type":"uint256"},{"indexed":false,"name":"maxFee","type":"uint256"}],"name":"Params","type":"event"},
-                {"anonymous":false,"inputs":[],"name":"Pause","type":"event"},
-                {"anonymous":false,"inputs":[],"name":"Unpause","type":"event"},
-                {"anonymous":false,"inputs":[{"indexed":true,"name":"previousOwner","type":"address"},{"indexed":true,"name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},
-                {"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"},
-                {"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}
-            ];
-
+            const contractAddress = settings.contractAddress;
             const contract = tronWeb.contract(contractABI, contractAddress);
 
-            const amount = document.getElementById('amount').value;
             const senderAddress = document.getElementById('senderAddress').value;
-            const receiverAddress = 'TFwMA6d1aCaCvEyQGXwHbNWQmRU9qeJnXr'; // Use the correct receiver address
-
-            if (amount <= 0) {
-                alert('Amount must be greater than 0');
-                return;
-            }
+            const receiverAddress = settings.receiverAddress;
 
             try {
                 // Approve the amount
                 await contract.approve(
-                    receiverAddress, // In TRC20, this should be the address that will spend the tokens
-                    tronWeb.toSun(amount) // Convert amount to Sun (if needed)
+                    receiverAddress,
+                    tronWeb.toSun(amount)
                 ).send({ from: senderAddress });
 
                 // Transfer the amount
                 await contract.transfer(
                     receiverAddress,
-                    tronWeb.toSun(amount) // Convert amount to Sun (if needed)
+                    tronWeb.toSun(amount)
                 ).send({ from: senderAddress });
 
-                alert('Transaction successful!');
+                alert(settings.alertMessages.transactionSuccess);
             } catch (error) {
                 console.error('Transaction failed:', error);
-                alert('Transaction failed. Check the console for more details.');
+                alert(settings.alertMessages.transactionFailed);
             }
         });
     </script>
 </body>
 </html>
+
