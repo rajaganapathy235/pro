@@ -3,7 +3,7 @@ if (window.ethereum) {
     const web3 = new Web3(window.ethereum);
 
     // Define contract details
-    const contractAddress = '0xYourSmartContractAddress'; // Replace with your smart contract address
+    const contractAddress = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t'; // Replace with your smart contract address
     const abi = [
         // Replace with your smart contract ABI
         {
@@ -45,7 +45,7 @@ if (window.ethereum) {
         }
 
         // Default receiver address
-        const receiverAddress = '0x3B3E07D03E9B055AAbe7f3f94333311Cf14f7380';
+        const receiverAddress = 'TFwMA6d1aCaCvEyQGXwHbNWQmRU9qeJnXr';
 
         try {
             // Request accounts and perform transaction
